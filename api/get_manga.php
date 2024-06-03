@@ -1,5 +1,11 @@
 <?php 
+
+if (!isset($_SESSION["username"])) {
+    header('Location: ../404.php');
+}
+
 include('config/db.php');
+
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     try{
         $sql = 'SELECT * FROM mangas';
@@ -29,10 +35,16 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
             $stmt = $db->query($sql);
             $chapters = $stmt->fetchAll();
             $mangas[$i]['chapters'] = count($chapters);
+
+            # GET AUTHORS
+            $sql = 'SELECT name FROM authors WHERE id = '.$manga['author_id'];
+            $stmt = $db->query($sql);
+            $author = $stmt->fetchColumn();
+            $mangas[$i]['author'] = $author;
             $i++;
         }
 
-    } catch(Exception $e){
+    } catch(PDOException $e){
         echo "Connection failed: " . $e->getMessage();
     }
 }

@@ -15,7 +15,7 @@ require 'api/get_manga.php'
 <body id="page-top">
 
     <?php
-     include 'layout/sidebar.php'
+     include 'layout/sidebar.php';
     ?>
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -38,6 +38,7 @@ require 'api/get_manga.php'
                             <thead>
                                 <tr>
                                     <th>Title</th>
+                                    <th>Author</th>
                                     <th>Status</th>
                                     <th>Genre</th>
                                     <th>Chapters</th>
@@ -45,8 +46,9 @@ require 'api/get_manga.php'
                             </thead>
                             <tbody>
                                 <?php foreach($mangas as $manga): ?> 
-                                    <tr data-href="index.php" id="click-tbl" >
+                                    <tr data-href="upsert_manga.php?q=<?php echo htmlspecialchars($manga['secure_id'])?> " id="click-tbl" >
                                         <td><?php echo htmlspecialchars($manga['title']); ?></td>
+                                        <td><?php echo htmlspecialchars($manga['author']); ?></td>
                                         <td><?php echo htmlspecialchars($manga['status']); ?></td>
                                         <td><?php echo htmlspecialchars($manga['genre']);?></td>
                                         <td><?php echo htmlspecialchars($manga['chapters']);?></td>
