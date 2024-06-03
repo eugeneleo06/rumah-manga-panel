@@ -44,13 +44,13 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-6">
                                 Title
-                                <input type="text" class="form-control form-control-sm" name="title" value="<?php if(isset($manga['title'])){echo $manga['title'];}?>">
+                                <input required type="text" class="form-control form-control-sm" name="title" value="<?php if(isset($manga['title'])){echo $manga['title'];}?>">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
                                 Author
-                                <select name="author" class="form-control form-control-sm">
+                                <select required name="author" class="form-control form-control-sm">
                                     <option disabled selected value> Select Author ..</option>
                                     <?php
                                     foreach($authors as $author) {
@@ -67,13 +67,15 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-6">
                                 Genre
-                                <select id="multi-select" name="genres[]" multiple="multiple" class="form-control form-control-sm" style="width:100%">
+                                <select required id="multi-select" name="genres[]" multiple="multiple" class="form-control form-control-sm" style="width:100%" required>
                                     <?php
                                     foreach($genres as $genre) {
                                         echo '<option value="'.$genre['id'].'"';
-                                        foreach($genreIds as $genreId) {
-                                            if ($genre['id'] == $genreId) {
-                                                echo ' selected';
+                                        if (isset($genreIds)){
+                                            foreach($genreIds as $genreId) {
+                                                if ($genre['id'] == $genreId) {
+                                                    echo ' selected';
+                                                }
                                             }
                                         }
                                         echo '>'.$genre['name'].'</option>';
@@ -85,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-6">
                                 Status
-                                <select name="status" class="form-control form-control-sm">
+                                <select required name="status" class="form-control form-control-sm">
                                     <option disabled selected value> Select Status ..</option>
                                     <?php
                                     echo '<option value="ONGOING"';
@@ -105,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-12">
                                 Synopsis
-                                <textarea name="synopsis" class="form-control" rows="3"><?php
+                                <textarea required name="synopsis" class="form-control" rows="3"><?php
                                         if (isset($manga['synopsis'])) {
                                             echo $manga['synopsis'];
                                         }
@@ -123,40 +125,54 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                                 ?>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-success my-2" onclick="addChapter()">Add Chapter</button>
-                        <div class="scrollable-container">
-                            <div class="form-row">
-                                <div class="form-group col-12 ">
-                                    <div id="chapterContainer">
-                                        <?php
-                                            if (isset($chapters) && count($chapters) > 0) {
-                                                $chapterCount = 0; // Initialize chapter count
-                                                foreach($chapters as $chapter) {
-                                                    echo '<div class="chapter-container">';
-                                                    echo '<label>Chapter</label>';
-                                                    echo '<input class="form-control form-control-sm" type="text" name="chapters[${chapterCount}][title]" required value="';
-                                                    echo $chapter['name'];
-                                                    echo '" />';
-                                                    echo '<label>Images:</label>';
-                                                    echo '<input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file][]" multiple/>';
-                                                    echo '<button type="button" class="btn btn-danger my-2" onclick="removeChapter(this)">Remove</button>';
-                                                    echo '<hr>';
-                                                    echo '</div>';
-                                                    $chapterCount++;
-                                                }  
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <input type="hidden" name="secure_id" value='<?php if(isset($secure_id)) {echo $secure_id;} ?>'>
+                        <?php if (isset($_SESSION['error'])) : ?>
+                            <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
+                        <?php endif; ?>
+                        <?php
+                        unset($_SESSION['error']); 
+                        ?>
                         <div class="form-row mt-3">
                             <div class="form-group col-12">
                                 <input type="submit" class="btn btn-success w-100" value="SAVE">
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4 mx-5">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">Chapters</h4>
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-success my-2" onclick="addChapter()">Add Chapter</button>
+                    <div class="scrollable-container">
+                        <div class="form-row">
+                            <div class="form-group col-12 ">
+                                <div id="chapterContainer">
+                                    <?php
+                                        if (isset($chapters) && count($chapters) > 0) {
+                                            $chapterCount = 0; // Initialize chapter count
+                                            foreach($chapters as $chapter) {
+                                                echo '<div class="chapter-container">';
+                                                echo '<label>Chapter</label>';
+                                                echo '<input class="form-control form-control-sm" type="text" name="chapters[${chapterCount}][title]" required value="';
+                                                echo $chapter['name'];
+                                                echo '" />';
+                                                echo '<label>Images:</label>';
+                                                echo '<input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file][]" multiple/>';
+                                                echo '<button type="button" class="btn btn-danger my-2" onclick="removeChapter(this)">Remove</button>';
+                                                echo '<hr>';
+                                                echo '</div>';
+                                                $chapterCount++;
+                                            }  
+                                        }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

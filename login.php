@@ -40,6 +40,9 @@ include('layout/header.php');
                                     <?php if (isset($_SESSION['error'])) : ?>
                                         <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
                                     <?php endif; ?>
+                                    <?php
+                                        unset($_SESSION['error']); 
+                                    ?>
                                     <hr>
                                 </div>
                             </div>

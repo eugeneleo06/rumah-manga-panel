@@ -17,7 +17,6 @@ $path = '../db.sqlite';
 include('../config/db.php');
 if ($_SERVER["REQUEST_METHOD"] == "POST") { 
     try {
-
         // Cloudflare R2 configuration
         $bucketName = 'rumah-manga';
 
@@ -38,64 +37,194 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $genres = json_encode($genres);
         $status = htmlspecialchars($_POST['status']);
         $synopsis = htmlspecialchars($_POST['synopsis']);
-        $secureId = htmlspecialchars($_POST['secure_id']);
 
-        # COVER IMAGE
-        // $coverImg = $_POST['cover_image'];
+        $isEdit = false;
 
-        # CHAPTERS
-        $chapters = $_POST['chapters'];
+        if(isset($_POST['secure_id']) && $_POST['secure_id'] != "") {
+            $isEdit = true;
+        }
 
-        foreach ($chapters as $index => $chapter) {
-            $title = htmlspecialchars($chapter['title']);
-            if (isset($_FILES['chapters']['name'][$index]['file']) && !empty($_FILES['chapters']['name'][$index]['file'])) {
-                $fileCount = count($_FILES['chapters']['name'][$index]['file']);
+        if($isEdit) {
+            $secure_id = htmlspecialchars($_POST['secure_id']);
+            $sql = "SELECT * FROM mangas m WHERE title='".$manga_title."' AND  secure_id <> '".$secure_id."' LIMIT 1";
+            $stmt = $db->query($sql);
+            $manga = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($manga) { //if title duplicate
+                $_SESSION['error'] = "Title already exists.";
+                $editPath = "?q=". $secure_id;
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+        } else {
+            $secure_id = htmlspecialchars($_POST['secure_id']);
+            $sql = "SELECT * FROM mangas m WHERE title='".$manga_title."' LIMIT 1";
+            $stmt = $db->query($sql);
+            $manga = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($manga) { //if title duplicate
+                $_SESSION['error'] = "Title already exists.";
+                header('Location: ../upsert_manga.php');
+                exit;
+            }
+        }
 
-                for ($i = 0; $i < $fileCount; $i++) {
-                    $fileName = Uuid::uuid1()->toString();
-                    $fileTmpName = $_FILES['chapters']['tmp_name'][$index]['file'][$i];
-                    $fileSize = $_FILES['chapters']['size'][$index]['file'][$i];
-                    $fileError = $_FILES['chapters']['error'][$index]['file'][$i];
-                    $fileType = $_FILES['chapters']['type'][$index]['file'][$i];
+        $editPath = "";
+        if ($isEdit){
+            $editPath = "?q=". $secure_id;
+        }
 
-                    $formats = explode('/', $fileType)[1];
+        if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
+            $file = $_FILES['cover_image'];
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+            $maxSize = 3 * 1024 * 1024; // 3MB
 
-                    if ($fileError === UPLOAD_ERR_OK) {
-                        $uploadDir = 'uploads/';
-                        if (!is_dir($uploadDir)) {
-                            mkdir($uploadDir, 0777, true);
-                        }
-                        $uploadFilePath = $uploadDir . basename($fileName);
+            $fileName = $file['name'];
+            $fileSize = $file['size'];
+            $fileTmpPath = $file['tmp_name'];
+            $fileType = $file['type'];
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
 
-                        if (move_uploaded_file($fileTmpName, $uploadFilePath)) {
-                            echo "File uploaded: " . htmlspecialchars($fileName) . "<br>";
-
-                            // Upload file to Cloudflare R2
-                            try {
-                                $result = $s3Client->putObject([
-                                    'Bucket' => $bucketName,
-                                    'Key' => $secureId.'/'.$fileName.'.'.$formats,
-                                    'SourceFile' => $uploadFilePath,
-                                    'ACL' => 'public-read',
-                                ]);
-
-                                echo "File uploaded to R2: " . htmlspecialchars($result['ObjectURL']) . "<br>";
-                            } catch (AwsException $e) {
-                                echo "Error uploading to R2: " . $e->getMessage() . "<br>";
-                            }
-                        } else {
-                            echo "Error moving file: " . htmlspecialchars($fileName) . "<br>";
-                        }
-                    } else {
-                        echo "Error uploading file: " . htmlspecialchars($fileName) . "<br>";
-                    }
-                }
-            } else {
-                echo "No files uploaded for this chapter.<br>";
+             // Validate file extension
+            if (!in_array(strtolower($fileExtension), $allowed)) {
+                $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
             }
 
-            echo "<hr>";
+             // Validate file size
+            if ($fileSize > $maxSize) {
+                $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+
+            $newFileName = Uuid::uuid1()->toString() . '.' . $fileExtension;
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $secure_id.'/'. $newFileName,
+                    'SourceFile' => $fileTmpPath,
+                    'ACL' => 'public-read',
+                ]);
+                $newURL = 'https://pub-4c611765f21e41988e62321652b5623f.r2.dev/'.$secure_id.'/'.$newFileName;
+            } catch (AwsException $e) {
+                $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;            
+            }
         }
+
+        if ($isEdit){
+            $sql = "SELECT * FROM mangas m WHERE secure_id ='".$secure_id."' LIMIT 1";
+            $stmt = $db->query($sql);
+            $manga = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($manga) {
+                if(isset($newURL)){
+                    $manga['cover_img'] = $newURL;
+                }
+                $sql = "UPDATE mangas set title = :title,  author_id = :author_id, genres_id = :genre_id, status = :status, synopsis = :synopsis, cover_img = :cover_img WHERE secure_id = :secure_id";
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':title', $manga_title, PDO::PARAM_STR);
+                $stmt->bindParam(':author_id', $author, PDO::PARAM_STR);
+                $stmt->bindParam(':genre_id', $genres, PDO::PARAM_STR);
+                $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+                $stmt->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
+                $stmt->bindParam(':cover_img', $manga['cover_img'], PDO::PARAM_STR);
+                $stmt->bindParam(':secure_id',$secure_id, PDO::PARAM_STR);
+                $stmt->execute();
+
+                // Check the number of affected rows
+                if ($stmt->rowCount() > 0) {
+                    unset($_SESSION['error']);
+                    header('Location: ../manga.php');
+                } else {
+                    $_SESSION['error'] = "Internal server error";
+                    header('Location: ../upsert_manga.php'.$editPath);
+                    exit;
+                }
+
+            } else{
+                $_SESSION['error'] = "Internal server error";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+        } else {
+                try {
+                    $sql2 = "INSERT INTO mangas (title, secure_id, author_id, genres_id, status, synopsis, cover_img) VALUES (:title, :secure_id, :author_id, :genres_id, :status, :synopsis, :cover_img)";
+                    $stmt2 = $db->prepare($sql2);
+                    
+                    $secure_id = Uuid::uuid1()->toString();
+                    $stmt2->bindParam(':title', $manga_title, PDO::PARAM_STR);
+                    $stmt2->bindParam(':secure_id', $secure_id, PDO::PARAM_STR);
+                    $stmt2->bindParam(':author_id', $author, PDO::PARAM_STR);
+                    $stmt2->bindParam(':genres_id', $genres, PDO::PARAM_STR);
+                    $stmt2->bindParam(':status', $status, PDO::PARAM_STR);
+                    $stmt2->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
+                    $stmt2->bindParam(':cover_img', $newURL, PDO::PARAM_STR);
+                    // Execute the statement
+                    $stmt2->execute();
+                    unset($_SESSION['error']);
+                    header('Location: ../manga.php');
+                } catch (PDOException $e) {
+                    echo $e->getMessage();
+                    die();
+                }
+        }
+
+        // # CHAPTERS
+        // $chapters = $_POST['chapters'];
+
+        // foreach ($chapters as $index => $chapter) {
+        //     $title = htmlspecialchars($chapter['title']);
+        //     if (isset($_FILES['chapters']['name'][$index]['file']) && !empty($_FILES['chapters']['name'][$index]['file'])) {
+        //         $fileCount = count($_FILES['chapters']['name'][$index]['file']);
+
+        //         for ($i = 0; $i < $fileCount; $i++) {
+        //             $fileName = Uuid::uuid1()->toString();
+        //             $fileTmpName = $_FILES['chapters']['tmp_name'][$index]['file'][$i];
+        //             $fileSize = $_FILES['chapters']['size'][$index]['file'][$i];
+        //             $fileError = $_FILES['chapters']['error'][$index]['file'][$i];
+        //             $fileType = $_FILES['chapters']['type'][$index]['file'][$i];
+
+        //             $formats = explode('/', $fileType)[1];
+
+        //             if ($fileError === UPLOAD_ERR_OK) {
+        //                 $uploadDir = 'uploads/';
+        //                 if (!is_dir($uploadDir)) {
+        //                     mkdir($uploadDir, 0777, true);
+        //                 }
+        //                 $uploadFilePath = $uploadDir . basename($fileName);
+
+        //                 if (move_uploaded_file($fileTmpName, $uploadFilePath)) {
+        //                     echo "File uploaded: " . htmlspecialchars($fileName) . "<br>";
+
+        //                     // Upload file to Cloudflare R2
+        //                     try {
+        //                         $result = $s3Client->putObject([
+        //                             'Bucket' => $bucketName,
+        //                             'Key' => $secureId.'/'.$fileName.'.'.$formats,
+        //                             'SourceFile' => $uploadFilePath,
+        //                             'ACL' => 'public-read',
+        //                         ]);
+
+        //                         echo "File uploaded to R2: " . htmlspecialchars($result['ObjectURL']) . "<br>";
+        //                     } catch (AwsException $e) {
+        //                         echo "Error uploading to R2: " . $e->getMessage() . "<br>";
+        //                     }
+        //                 } else {
+        //                     echo "Error moving file: " . htmlspecialchars($fileName) . "<br>";
+        //                 }
+        //             } else {
+        //                 echo "Error uploading file: " . htmlspecialchars($fileName) . "<br>";
+        //             }
+        //         }
+        //     } else {
+        //         echo "No files uploaded for this chapter.<br>";
+        //     }
+
+        //     echo "<hr>";
+        // }
 
 
     } catch(Exception $e){

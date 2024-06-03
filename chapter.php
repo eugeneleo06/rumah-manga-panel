@@ -30,10 +30,9 @@ require 'api/get_manga.php'
             <!-- DataTales Example -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h4 class="m-0 font-weight-bold text-primary">Manga</h4>
+                    <h4 class="m-0 font-weight-bold text-primary">Chapter</h4>
                 </div>
                 <div class="card-body">
-                    <a type="button" class="btn btn-success my-2" href="upsert_manga.php">Create Manga</a>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                             <thead>
@@ -43,18 +42,16 @@ require 'api/get_manga.php'
                                     <th>Status</th>
                                     <th>Genre</th>
                                     <th>Chapters</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach($mangas as $manga): ?> 
-                                    <tr data-href="upsert_manga.php?q=<?php echo htmlspecialchars($manga['secure_id'])?> " id="click-tbl" >
+                                    <tr data-href="upsert_chapter.php?q=<?php echo htmlspecialchars($manga['secure_id'])?> " id="click-tbl" >
                                         <td><?php echo htmlspecialchars($manga['title']); ?></td>
                                         <td><?php echo htmlspecialchars($manga['author']); ?></td>
                                         <td><?php echo htmlspecialchars($manga['status']); ?></td>
                                         <td><?php echo htmlspecialchars($manga['genre']);?></td>
                                         <td><?php echo htmlspecialchars($manga['chapters']);?></td>
-                                        <td><?php echo '<a href="api/delete_manga.php?q='.$manga['secure_id'].'"><i class="fas fa-trash"></i></a>';?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

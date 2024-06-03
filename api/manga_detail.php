@@ -17,6 +17,10 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
             $stmt = $db->query($sql);
             $chapters = $stmt->fetchAll();
 
+            foreach($chapters as $index=>$chapter) {
+                $chapters[$index]['amount'] = count(json_decode($chapter['img_url']));
+            }
+
             # DECODE GENRES ID
             $genreIds = json_decode($manga['genres_id']);
         }
@@ -24,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         # GET ALL GENRES
         $sql = "SELECT * FROM genres";
         $stmt = $db->query($sql);
-        $genres = $stmt->fetchAll();  
+        $genres = $stmt->fetchAll(); 
 
         # GET ALL AUTHORS
         $sql = "SELECT * FROM authors";
