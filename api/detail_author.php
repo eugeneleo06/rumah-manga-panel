@@ -1,7 +1,7 @@
 <?php 
 
 if (!isset($_SESSION["username"])) {
-    header('Location: ../404.php');
+    header('Location: 404.php');
 }
 
 include('config/db.php');

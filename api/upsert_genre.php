@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $name = $_POST["name"];
 
-        if (isset($_POST["id"])) {
+        if (isset($_POST["id"]) && $_POST['id'] != "") {
             $id = htmlspecialchars($_POST['id']);
 
             $sql = "SELECT * FROM genres WHERE name=:name AND id != :id";
