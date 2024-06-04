@@ -168,64 +168,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     header('Location: ../manga.php');
                 } catch (PDOException $e) {
                     echo $e->getMessage();
-                    die();
+                    exit;
                 }
         }
-
-        // # CHAPTERS
-        // $chapters = $_POST['chapters'];
-
-        // foreach ($chapters as $index => $chapter) {
-        //     $title = htmlspecialchars($chapter['title']);
-        //     if (isset($_FILES['chapters']['name'][$index]['file']) && !empty($_FILES['chapters']['name'][$index]['file'])) {
-        //         $fileCount = count($_FILES['chapters']['name'][$index]['file']);
-
-        //         for ($i = 0; $i < $fileCount; $i++) {
-        //             $fileName = Uuid::uuid1()->toString();
-        //             $fileTmpName = $_FILES['chapters']['tmp_name'][$index]['file'][$i];
-        //             $fileSize = $_FILES['chapters']['size'][$index]['file'][$i];
-        //             $fileError = $_FILES['chapters']['error'][$index]['file'][$i];
-        //             $fileType = $_FILES['chapters']['type'][$index]['file'][$i];
-
-        //             $formats = explode('/', $fileType)[1];
-
-        //             if ($fileError === UPLOAD_ERR_OK) {
-        //                 $uploadDir = 'uploads/';
-        //                 if (!is_dir($uploadDir)) {
-        //                     mkdir($uploadDir, 0777, true);
-        //                 }
-        //                 $uploadFilePath = $uploadDir . basename($fileName);
-
-        //                 if (move_uploaded_file($fileTmpName, $uploadFilePath)) {
-        //                     echo "File uploaded: " . htmlspecialchars($fileName) . "<br>";
-
-        //                     // Upload file to Cloudflare R2
-        //                     try {
-        //                         $result = $s3Client->putObject([
-        //                             'Bucket' => $bucketName,
-        //                             'Key' => $secureId.'/'.$fileName.'.'.$formats,
-        //                             'SourceFile' => $uploadFilePath,
-        //                             'ACL' => 'public-read',
-        //                         ]);
-
-        //                         echo "File uploaded to R2: " . htmlspecialchars($result['ObjectURL']) . "<br>";
-        //                     } catch (AwsException $e) {
-        //                         echo "Error uploading to R2: " . $e->getMessage() . "<br>";
-        //                     }
-        //                 } else {
-        //                     echo "Error moving file: " . htmlspecialchars($fileName) . "<br>";
-        //                 }
-        //             } else {
-        //                 echo "Error uploading file: " . htmlspecialchars($fileName) . "<br>";
-        //             }
-        //         }
-        //     } else {
-        //         echo "No files uploaded for this chapter.<br>";
-        //     }
-
-        //     echo "<hr>";
-        // }
-
 
     } catch(Exception $e){
         echo "Connection failed: " . $e->getMessage();

@@ -9,7 +9,7 @@ background-color: #f2f3ff;
 
 .scrollable-container {
     overflow-y: scroll;
-    height:250px;
+    height:350px;
     border:2px solid;
     padding:20px;
 }

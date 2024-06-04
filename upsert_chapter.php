@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
 
     $secure_id = $_GET['q'];
     $path = 'db.sqlite';
-    require 'api/manga_detail.php';
+    require 'api/detail_manga.php';
 ?>
 
 <body id="page-top">
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                     <h4 class="m-0 font-weight-bold text-primary">Add Chapter</h4>
                 </div>
                 <div class="card-body">
-                    <form class="px-5 form-upsert" action="api/upsert_manga.php" method="post" enctype="multipart/form-data">
+                    <form class="px-5 form-upsert" action="api/create_chapter.php" method="post" enctype="multipart/form-data">
                         <button type="button" class="btn btn-success my-2" onclick="addChapter()">Add Chapter</button>
                         <div class="scrollable-container">
                             <div class="form-row">
@@ -67,40 +67,66 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                     <h4 class="m-0 font-weight-bold text-primary">Edit Chapter</h4>
                 </div>
                 <div class="card-body">
-                    <form class="px-5 form-upsert" action="api/upsert_manga.php" method="post" enctype="multipart/form-data">
-                        <div class="form-group col-12">
-                            <div class="form-row">
-                                Choose chapter
-                                <select required name="chapter_list" id="chapter_list" class="form-control form-control-sm">
-                                    <option disabled selected value> Select Chapters ..</option>
-                                    <?php
-                                    foreach($chapters as $chapter) {
-                                        echo '<option value="'.$chapter['secure_id'].'"';
-                                        echo '>'.$chapter['name'].'</option>';
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <br>
-                            <div class="form-row">
+                    <div class="form-group col-12">
+                        <div class="form-row px-5">
+                            Choose chapter
+                            <select required name="chapter_list" id="chapter_list" class="form-control form-control-sm">
+                                <option disabled selected value> Select Chapters ..</option>
                                 <?php
                                 foreach($chapters as $chapter) {
-                                    echo '<div id="chapter_' . $chapter['secure_id'] . '" class="chapter-content" style="display: none;">';
-                                    echo '<label>Chapter Name</label>';
-                                    echo '<input class="form-control form-control-md" type="text" name="chapter_title" required value="'.$chapter['name'].'"/>';
-                                    echo '<label>Images (Upload to change) :</label><br>';
-                                    echo '<label style="color:green;">Exist : '.$chapter['amount'].' images</label>';
-                                    echo '<input class="form-control form-control-md" type="file" name="chapter_image" multiple/>';
-                                    echo '<button type="button" class="btn btn-danger my-3">Delete Chapter</button>';
-                                    echo '</div>';
+                                    echo '<option value="'.$chapter['secure_id'].'"';
+                                    echo '>'.$chapter['name'].'</option>';
                                 }
                                 ?>
-                            </div>
+                            </select>
                         </div>
-                    </form>
+                        <br>
+                        <div class="form-row px-5">
+                            <?php
+                            foreach($chapters as $chapter) {
+                                echo '<form class="form-upsert" action="api/update_chapter.php?q='.$chapter['secure_id'].'" method="post" enctype="multipart/form-data">';
+                                echo '<div id="chapter_' . $chapter['secure_id'] . '" class="chapter-content" style="display: none;">';
+                                echo '<label>Chapter Name</label>';
+                                echo '<input class="form-control form-control-md" type="text" name="chapter_title" required value="'.$chapter['name'].'"/>';
+                                echo '<label>Images (Upload to change) :</label>';
+                                echo '<label style="color:green;">&nbsp;	&nbsp;Exist : '.$chapter['amount'].' images</label>';
+                                echo '<input class="form-control form-control-md" type="file" name="chapter_image[]" multiple accept="image/*"/>';
+                                echo '<input type="hidden" name="secure_id" value="'.$chapter['secure_id'].'">';
+                                echo '<input type="submit" class="btn btn-success my-3" value="Save Chapter"> ';
+                                echo '<button type="button" class="btn btn-danger my-3" id="delete-btn" data-secure-id="'.$chapter['secure_id'].'">Delete Chapter</button>';
+                                echo '</div>';
+                                if (isset($_SESSION['error'])) : ?>
+                                    <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
+                                <?php endif; ?>
+                                <?php
+                                unset($_SESSION['error']); 
+                                echo '</form>';
+                            }
+                            ?>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete this chapter?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <a href="#" id="confirmDelete" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /.container-fluid -->
 
@@ -154,15 +180,11 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                 <label>Chapter</label>
                 <input class="form-control form-control-sm" type="text" name="chapters[${chapterCount}][title]" required />
                 <label>Images:</label>
-                <input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file]" multiple/>
+                <input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file][]" multiple accept="image/*"/>
                 <button type="button" class="btn btn-danger my-2" onclick="removeChapter(this)">Remove</button>
                 <hr>
             `;
-            if (container.firstChild) {
-                container.insertBefore(chapter, container.firstChild);
-            } else {
-                container.appendChild(chapter);
-            }        
+            container.appendChild(chapter);     
         }
 
         function removeChapter(button) {
@@ -184,7 +206,14 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                 }
             });
         });
-
+        
+        $('#delete-btn').click(function(event) {
+            event.preventDefault();
+            var secureId = $(this).data('secure-id');
+            var deleteUrl = 'api/delete_chapter.php?q=' + secureId;
+            $('#confirmDelete').attr('href', deleteUrl);
+            $('#deleteModal').modal('show');
+        });
     </script>
 
 

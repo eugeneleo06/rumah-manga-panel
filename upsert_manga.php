@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
         $secure_id = $_GET['q'];
     }
     $path = 'db.sqlite';
-    require 'api/manga_detail.php';
+    require 'api/detail_manga.php';
 ?>
 
 <body id="page-top">
@@ -117,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-12">
                                 Cover Image
-                                <input class="form-control form-control-md" type="file" name="cover_image"/>
+                                <input class="form-control form-control-md" type="file" name="cover_image" accept="image/*"/>
                                 <?php
                                     if(isset($manga['cover_img'])) {
                                         echo '<img class="img-thumbnail mt-2" src="'.$manga['cover_img'].'">';
@@ -140,42 +140,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                     </form>
                 </div>
             </div>
-
-            <div class="card shadow mb-4 mx-5">
-                <div class="card-header py-3">
-                    <h4 class="m-0 font-weight-bold text-primary">Chapters</h4>
-                </div>
-                <div class="card-body">
-                    <button type="button" class="btn btn-success my-2" onclick="addChapter()">Add Chapter</button>
-                    <div class="scrollable-container">
-                        <div class="form-row">
-                            <div class="form-group col-12 ">
-                                <div id="chapterContainer">
-                                    <?php
-                                        if (isset($chapters) && count($chapters) > 0) {
-                                            $chapterCount = 0; // Initialize chapter count
-                                            foreach($chapters as $chapter) {
-                                                echo '<div class="chapter-container">';
-                                                echo '<label>Chapter</label>';
-                                                echo '<input class="form-control form-control-sm" type="text" name="chapters[${chapterCount}][title]" required value="';
-                                                echo $chapter['name'];
-                                                echo '" />';
-                                                echo '<label>Images:</label>';
-                                                echo '<input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file][]" multiple/>';
-                                                echo '<button type="button" class="btn btn-danger my-2" onclick="removeChapter(this)">Remove</button>';
-                                                echo '<hr>';
-                                                echo '</div>';
-                                                $chapterCount++;
-                                            }  
-                                        }
-                                    ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
         <!-- /.container-fluid -->
 
@@ -218,33 +182,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                 allowClear: true
             });
         });
-
-        let chapterCount = <?php echo isset($chapterCount) ? $chapterCount : 0; ?>;
-
-        function addChapter() {
-            chapterCount++;
-            const container = document.getElementById('chapterContainer');
-            const chapter = document.createElement('div');
-            chapter.className = 'chapter-container';
-            chapter.innerHTML = `
-                <label>Chapter</label>
-                <input class="form-control form-control-sm" type="text" name="chapters[${chapterCount}][title]" required />
-                <label>Images:</label>
-                <input class="form-control form-control-md" type="file" name="chapters[${chapterCount}][file]" multiple/>
-                <button type="button" class="btn btn-danger my-2" onclick="removeChapter(this)">Remove</button>
-                <hr>
-            `;
-            if (container.firstChild) {
-                container.insertBefore(chapter, container.firstChild);
-            } else {
-                container.appendChild(chapter);
-            }        
-        }
-
-        function removeChapter(button) {
-            const container = document.getElementById('chapterContainer');
-            container.removeChild(button.parentNode);
-        }
     </script>
 
 

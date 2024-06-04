@@ -9,7 +9,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 $path = 'db.sqlite';
-require 'api/get_manga.php'
+require 'api/get_author.php'
 ?>
 
 <body id="page-top">
@@ -27,37 +27,35 @@ require 'api/get_manga.php'
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
+            <?php if (isset($_SESSION['error'])) : ?>
+                <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
+            <?php endif; ?>
+            <?php
+                unset($_SESSION['error']); 
+            ?>
             <!-- DataTales Example -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h4 class="m-0 font-weight-bold text-primary">Manga</h4>
+                    <h4 class="m-0 font-weight-bold text-primary">Author</h4>
                 </div>
                 <div class="card-body">
-                    <a type="button" class="btn btn-success my-2" href="upsert_manga.php">Create Manga</a>
+                    <a type="button" class="btn btn-success my-2" href="upsert_author.php">Create Author</a>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Author</th>
-                                    <th>Status</th>
-                                    <th>Genre</th>
-                                    <th>Chapters</th>
+                                    <th>Name</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach($mangas as $manga): ?> 
+                                <?php foreach($authors as $author): ?> 
                                     <tr>
-                                        <td><?php echo htmlspecialchars($manga['title']); ?></td>
-                                        <td><?php echo htmlspecialchars($manga['author']); ?></td>
-                                        <td><?php echo htmlspecialchars($manga['status']); ?></td>
-                                        <td><?php echo htmlspecialchars($manga['genre']);?></td>
-                                        <td><?php echo htmlspecialchars($manga['chapters']);?></td>
+                                        <td><?php echo htmlspecialchars($author['name']);?></td>
                                         <td>
-                                            <?php echo '<a href="upsert_manga.php?q='.htmlspecialchars($manga['secure_id']).'"><i class="fas fa-lg fa-edit"></i></a>';?>
+                                            <?php echo '<a href="upsert_author.php?q='.htmlspecialchars($author['secure_id']).'"><i class="fas fa-lg fa-edit"></i></a>';?>
                                             <span style="margin-left:20px;"></span>
-                                            <?php echo '<a href="#" class="delete-btn" data-secure-id="'.$manga['secure_id'].'"><i class="fas fa-lg fa-trash"></i></a>';?>
+                                            <?php echo '<a href="#" class="delete-btn" data-secure-id="'.$author['secure_id'].'"><i class="fas fa-lg fa-trash"></i></a>';?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -78,7 +76,7 @@ require 'api/get_manga.php'
                         </button>
                     </div>
                     <div class="modal-body">
-                        Are you sure you want to delete this manga?
+                        Are you sure you want to delete this author?
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -122,7 +120,7 @@ require 'api/get_manga.php'
         $('.delete-btn').click(function(event) {
             event.preventDefault();
             var secureId = $(this).data('secure-id');
-            var deleteUrl = 'api/delete_manga.php?q=' + secureId;
+            var deleteUrl = 'api/delete_author.php?q=' + secureId;
             $('#confirmDelete').attr('href', deleteUrl);
             $('#deleteModal').modal('show');
         });

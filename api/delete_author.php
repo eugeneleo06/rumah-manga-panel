@@ -15,28 +15,34 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     try {
         $secure_id = htmlspecialchars($_GET['q']);
 
-        $db->beginTransaction();
-        $sql = "SELECT id FROM mangas WHERE secure_id = :secure_id";
+        
+        $sql = "SELECT id FROM authors WHERE secure_id=:secure_id";
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':secure_id', $secure_id, PDO::PARAM_STR);
         $stmt->execute();
-        $mangaId = $stmt->fetchColumn();
+        $authorId = $stmt->fetchColumn();
 
-        $sql = "DELETE FROM chapters WHERE manga_id = :manga_id";
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam(':manga_id', $mangaId, PDO::PARAM_STR);
-        $stmt->execute();
 
-        $sql = "DELETE FROM mangas WHERE secure_id = :secure_id";
+        $sql = "SELECT * FROM mangas WHERE author_id = :author_id";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':secure_id', $secure_id, PDO::PARAM_STR);
+        $stmt->bindParam(':author_id', $authorId, PDO::PARAM_INT);
         $stmt->execute();
-        $db->commit();
+        $mangas = $stmt->fetchAll();
+
+        if ($mangas) {
+            $_SESSION['error'] = "Please delete mangas with this author first";
+            header('Location: ../author.php');
+            exit;
+        }
+
+        $sql = "DELETE FROM authors WHERE id = :id";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':id', $authorId, PDO::PARAM_STR);
+        $stmt->execute();
 
         unset($_SESSION['error']);
-        header('Location: ../manga.php');
+        header('Location: ../author.php');
     } catch (PDOException $e) { 
-        $db->rollBack();
         echo $e->getMessage();
         exit;
     }
