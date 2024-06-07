@@ -6,6 +6,9 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Ramsey\Uuid\Uuid;
 
+
+ob_start();
+
 session_start();
 
 if (!isset($_SESSION["username"])) {

@@ -6,8 +6,10 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Ramsey\Uuid\Uuid;
 
-session_start();
 
+ob_start();
+
+session_start();
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
 }

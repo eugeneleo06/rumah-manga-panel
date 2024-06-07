@@ -1,4 +1,6 @@
 <?php
+ob_start();
+
 session_start();
 $path = '../db.sqlite';
 include('../config/db.php');
