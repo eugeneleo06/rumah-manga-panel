@@ -13,6 +13,7 @@ session_start();
 
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
+    exit;
 }
 
 $path = '../db.sqlite';
@@ -141,6 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($stmt->rowCount() > 0) {
                     unset($_SESSION['error']);
                     header('Location: ../manga.php');
+                    exit;
                 } else {
                     $_SESSION['error'] = "Internal server error";
                     header('Location: ../upsert_manga.php'.$editPath);
@@ -169,6 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt2->execute();
                     unset($_SESSION['error']);
                     header('Location: ../manga.php');
+                    exit;
                 } catch (PDOException $e) {
                     echo $e->getMessage();
                     exit;

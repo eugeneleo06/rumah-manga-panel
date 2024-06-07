@@ -11,6 +11,7 @@ session_start();
 
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
+    exit;
 }
 
 
@@ -110,6 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $db->commit();
         unset($_SESSION['error']);
         header('Location: ../upsert_chapter.php?q='.$secure_id);
+        exit;
     } catch (PDOException $e) { 
         echo $e->getMessage();
         exit;

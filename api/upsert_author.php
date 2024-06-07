@@ -11,6 +11,7 @@ ob_start();
 session_start();
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
+    exit;
 }
 
 
@@ -41,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         unset($_SESSION['error']);
         header('Location: ../author.php');
+        exit;
     } catch (PDOException $e) { 
         echo $e->getMessage();
         exit;

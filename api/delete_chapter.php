@@ -5,6 +5,7 @@ session_start();
 
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
+    exit;
 }
 
 
@@ -35,6 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
         unset($_SESSION['error']);
         header('Location: ../upsert_chapter.php?q='.$mangaSecureId);
+        exit;
     } catch (PDOException $e) { 
         echo $e->getMessage();
         exit;

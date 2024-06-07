@@ -5,6 +5,7 @@ session_start();
 
 if (!isset($_SESSION["username"])) {
     header('Location: ../404.php');
+    exit;
 }
 
 
@@ -36,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
         unset($_SESSION['error']);
         header('Location: ../manga.php');
+        exit;
     } catch (PDOException $e) { 
         $db->rollBack();
         echo $e->getMessage();
