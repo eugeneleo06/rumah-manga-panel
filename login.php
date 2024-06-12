@@ -22,7 +22,7 @@ include('layout/header.php');
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                        <h1 class="h4 text-gray-900 mb-4">Hi!</h1>
                                     </div>
                                     <form class="user" method="post" action="api/login.php">
                                         <div class="form-group">
