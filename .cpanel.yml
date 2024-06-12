@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/rumahman/public_html/admin.rumahmanga.com
+    - /bin/cp -R images $DEPLOYPATH
