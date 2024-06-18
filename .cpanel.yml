@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/rumahman/public_html/admin.rumahmanga.com
+    - export REPO=https://github.com/eugeneleo06/rumah-manga-panel.git
+    - cd $DEPLOYPATH
+    - git clone $REPO $DEPLOYPATH || (cd $DEPLOYPATH && git pull origin main)
+    - /bin/cp -R images $DEPLOYPATH
