@@ -76,6 +76,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $editPath = "?q=". $secure_id;
         }
 
+        if (isset($_FILES['headline_image']) && $_FILES['headline_image']['error'] == 0) {
+            $file = $_FILES['headline_image'];
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+            $maxSize = 3 * 1024 * 1024; // 3MB
+
+            $fileName = $file['name'];
+            $fileSize = $file['size'];
+            $fileTmpPath = $file['tmp_name'];
+            $fileType = $file['type'];
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+             // Validate file extension
+            if (!in_array(strtolower($fileExtension), $allowed)) {
+                $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+
+             // Validate file size
+            if ($fileSize > $maxSize) {
+                $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+
+            $newFileName = Uuid::uuid1()->toString() . '.' . $fileExtension;
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $secure_id.'/'. $newFileName,
+                    'SourceFile' => $fileTmpPath,
+                    'ACL' => 'public-read',
+                ]);
+                $newURLHeadline = 'https://pub-4c611765f21e41988e62321652b5623f.r2.dev/'.$secure_id.'/'.$newFileName;
+            } catch (AwsException $e) {
+                $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;            
+            }
+        }
+
         if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
             $file = $_FILES['cover_image'];
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -127,7 +169,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if(isset($newURL)){
                     $manga['cover_img'] = $newURL;
                 }
-                $sql = "UPDATE mangas set title = :title,  author_id = :author_id, genres_id = :genre_id, status = :status, synopsis = :synopsis, cover_img = :cover_img WHERE secure_id = :secure_id";
+                if(isset($newURLHeadline)) {
+                    $manga['headline_img'] = $newURLHeadline;
+                }
+                $sql = "UPDATE mangas set title = :title,  author_id = :author_id, genres_id = :genre_id, status = :status, synopsis = :synopsis, cover_img = :cover_img, headline_img = :headline_img WHERE secure_id = :secure_id";
                 $stmt = $db->prepare($sql);
                 $stmt->bindParam(':title', $manga_title, PDO::PARAM_STR);
                 $stmt->bindParam(':author_id', $author, PDO::PARAM_STR);
@@ -135,6 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bindParam(':status', $status, PDO::PARAM_STR);
                 $stmt->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
                 $stmt->bindParam(':cover_img', $manga['cover_img'], PDO::PARAM_STR);
+                $stmt->bindParam(':headline_img', $manga['headline_img'], PDO::PARAM_STR);
                 $stmt->bindParam(':secure_id',$secure_id, PDO::PARAM_STR);
                 $stmt->execute();
 
@@ -156,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
                 try {
-                    $sql2 = "INSERT INTO mangas (title, secure_id, author_id, genres_id, status, synopsis, cover_img) VALUES (:title, :secure_id, :author_id, :genres_id, :status, :synopsis, :cover_img)";
+                    $sql2 = "INSERT INTO mangas (title, secure_id, author_id, genres_id, status, synopsis, cover_img, headline_img) VALUES (:title, :secure_id, :author_id, :genres_id, :status, :synopsis, :cover_img, :headline_img)";
                     $stmt2 = $db->prepare($sql2);
                     
                     $secure_id = Uuid::uuid1()->toString();
@@ -167,6 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt2->bindParam(':status', $status, PDO::PARAM_STR);
                     $stmt2->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
                     $stmt2->bindParam(':cover_img', $newURL, PDO::PARAM_STR);
+                    $stmt2->bindParam(':headline_img', $newURLHeadline, PDO::PARAM_STR);
                     // Execute the statement
                     $stmt2->execute();
                     unset($_SESSION['error']);

@@ -99,9 +99,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $imgURL = json_encode($newURL);
             $uuid =  Uuid::uuid1()->toString();
 
-            $sql = "INSERT INTO chapters (created_date, secure_id, manga_id, name, img_url) VALUES (:created_date, :secure_id, :manga_id, :name, :img_url)";
+            $sql = "INSERT INTO chapters (secure_id, manga_id, name, img_url) VALUES (:secure_id, :manga_id, :name, :img_url)";
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':created_date', date("Y-m-d"), PDO::PARAM_STR);
             $stmt->bindParam(':name', $title, PDO::PARAM_STR);
             $stmt->bindParam(':secure_id', $uuid, PDO::PARAM_STR);
             $stmt->bindParam(':img_url', $imgURL , PDO::PARAM_STR);
