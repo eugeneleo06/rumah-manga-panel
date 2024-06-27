@@ -50,6 +50,12 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                             </div>
                         </div>
                         <div class="form-row">
+                            <div class="form-group col-6">
+                                Ads URL
+                                <input required type="text" class="form-control form-control-sm" name="url" value="<?php if(isset($ads['url'])){echo $ads['url'];}?>">
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group col-12">
                                 Image
                                 <input class="form-control form-control-md" type="file" name="image" accept="image/*"/>

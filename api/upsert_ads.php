@@ -36,6 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         $name = htmlspecialchars($_POST['name']);
+        $url = htmlspecialchars($_POST['url']);
 
         $isEdit = false;
 
@@ -122,10 +123,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if(isset($newURL)){
                     $ads['img_url'] = $newURL;
                 }
-                $sql = "UPDATE ads set name = :name, img_url = :img_url WHERE secure_id = :secure_id";
+                $sql = "UPDATE ads set name = :name, img_url = :img_url, url = :url WHERE secure_id = :secure_id";
                 $stmt = $db->prepare($sql);
                 $stmt->bindParam(':name', $name, PDO::PARAM_STR);
                 $stmt->bindParam(':img_url', $ads['img_url'], PDO::PARAM_STR);
+                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
                 $stmt->bindParam(':secure_id',$secure_id, PDO::PARAM_STR);
 
                 // var_dump($stmt);exit;
