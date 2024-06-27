@@ -41,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $genres = json_encode($genres);
         $status = htmlspecialchars($_POST['status']);
         $synopsis = htmlspecialchars($_POST['synopsis']);
+        $adsURL = htmlspecialchars($_POST['ads_url']);
 
         $isEdit = false;
 
@@ -160,6 +161,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
+        if (isset($_FILES['ads_image']) && $_FILES['ads_image']['error'] == 0) {
+            $file = $_FILES['ads_image'];
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+            $maxSize = 3 * 1024 * 1024; // 3MB
+
+            $fileName = $file['name'];
+            $fileSize = $file['size'];
+            $fileTmpPath = $file['tmp_name'];
+            $fileType = $file['type'];
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+             // Validate file extension
+            if (!in_array(strtolower($fileExtension), $allowed)) {
+                $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+
+             // Validate file size
+            if ($fileSize > $maxSize) {
+                $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;
+            }
+
+            $newFileName = Uuid::uuid1()->toString() . '.' . $fileExtension;
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $secure_id.'/'. $newFileName,
+                    'SourceFile' => $fileTmpPath,
+                    'ACL' => 'public-read',
+                ]);
+                $newURLAds = 'https://pub-4c611765f21e41988e62321652b5623f.r2.dev/'.$secure_id.'/'.$newFileName;
+            } catch (AwsException $e) {
+                $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
+                header('Location: ../upsert_manga.php'.$editPath);
+                exit;            
+            }
+        }
+
         if ($isEdit){
             $sql = "SELECT * FROM mangas m WHERE secure_id ='".$secure_id."' LIMIT 1";
             $stmt = $db->query($sql);
@@ -172,7 +215,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if(isset($newURLHeadline)) {
                     $manga['headline_img'] = $newURLHeadline;
                 }
-                $sql = "UPDATE mangas set title = :title,  author_id = :author_id, genres_id = :genre_id, status = :status, synopsis = :synopsis, cover_img = :cover_img, headline_img = :headline_img WHERE secure_id = :secure_id";
+                if(isset($newURLAds)) {
+                    $manga['ads_img'] = $newURLAds;
+                }
+                $sql = "UPDATE mangas set title = :title,  author_id = :author_id, genres_id = :genre_id, status = :status, synopsis = :synopsis, cover_img = :cover_img, headline_img = :headline_img, ads_img = :ads_img, ads_url = :ads_url WHERE secure_id = :secure_id";
                 $stmt = $db->prepare($sql);
                 $stmt->bindParam(':title', $manga_title, PDO::PARAM_STR);
                 $stmt->bindParam(':author_id', $author, PDO::PARAM_STR);
@@ -181,6 +227,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
                 $stmt->bindParam(':cover_img', $manga['cover_img'], PDO::PARAM_STR);
                 $stmt->bindParam(':headline_img', $manga['headline_img'], PDO::PARAM_STR);
+                $stmt->bindParam(':ads_img', $manga['ads_img'], PDO::PARAM_STR);
+                $stmt->bindParam(':ads_url', $adsURL, PDO::PARAM_STR);
                 $stmt->bindParam(':secure_id',$secure_id, PDO::PARAM_STR);
                 $stmt->execute();
 

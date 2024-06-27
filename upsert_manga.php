@@ -138,6 +138,23 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                                 ?>
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                Ads URL
+                                <input required type="text" class="form-control form-control-sm" name="ads_url" value="<?php if(isset($manga['ads_url'])){echo $manga['ads_url'];}?>">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                Ads Image
+                                <input class="form-control form-control-md" type="file" name="ads_image" accept="image/*"/>
+                                <?php
+                                    if(isset($manga['cover_img'])) {
+                                        echo '<img class="img-thumbnail mt-2" src="'.$manga['ads_img'].'">';
+                                    }
+                                ?>
+                            </div>
+                        </div>
                         <input type="hidden" name="secure_id" value='<?php if(isset($secure_id)) {echo $secure_id;} ?>'>
                         <?php if (isset($_SESSION['error'])) : ?>
                             <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
