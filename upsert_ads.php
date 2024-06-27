@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
-                                Ads URL
+                                Ads URL (Use HTTP / HTTPS)
                                 <input type="text" class="form-control form-control-sm" name="url" value="<?php if(isset($ads['url'])){echo $ads['url'];}?>">
                             </div>
                         </div>
