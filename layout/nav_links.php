@@ -8,4 +8,10 @@ $nav_links = [
     ['url'=> 'author.php', 'text' => 'Author'],
     ['url'=> 'ads.php', 'text' => 'Ads'],
 ];
+
+if (isset($_SESSION['username']) && $_SESSION['username'] == 'master') {
+    $nav_links[] = ['url' => 'admin.php', 'text' => 'Admin'];
+    // Add more links as needed
+}
+
 ?>
