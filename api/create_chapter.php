@@ -44,10 +44,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $s3Client = new S3Client([
             'region' => 'auto',
             'version' => 'latest',
-            'endpoint' => 'https://30bec3ffe57679ccf1b6241164b1035a.r2.cloudflarestorage.com',
+            'endpoint' => 'https://110919c691af57fd4283c3c05211252d.r2.cloudflarestorage.com/',
             'credentials' => [
-                'key' => '48c8f95fb86c743a509cf22d02fcf265',
-                'secret' => 'b8e0b179cf9e1586609c670422a93c17461cb84656d970690a885c196e0781b7',
+                'key' => '020c964526eb3f64d899f9d5b6905d7a',
+                'secret' => '0fd485ace28b70d417ac19f249f2cb2b0836c6051f854c02ed9e464de3e2b279
+',
             ],
         ]);
 
@@ -88,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         'ACL' => 'public-read',
                     ]);
     
-                    $newURL[] = 'https://pub-4c611765f21e41988e62321652b5623f.r2.dev/'.$manga_id.'/'.$newFileName;
+                    $newURL[] = 'https://pub-2bfa6b528bf54fa9a840c5feca5a3a76.r2.dev/'.$manga_id.'/'.$newFileName;
                 } catch (AwsException $e) {
                     $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
                     $db->rollBack();
