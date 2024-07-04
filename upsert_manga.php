@@ -141,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <div class="form-row">
                             <div class="form-group col-12">
                                 Ads URL (Use HTTP / HTTPS)
-                                <input required type="text" class="form-control form-control-sm" name="ads_url" value="<?php if(isset($manga['ads_url'])){echo $manga['ads_url'];}?>">
+                                <input type="text" class="form-control form-control-sm" name="ads_url" value="<?php if(isset($manga['ads_url'])){echo $manga['ads_url'];}?>">
                             </div>
                         </div>
                         <div class="form-row">

@@ -43,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $status = htmlspecialchars($_POST['status']);
         $synopsis = htmlspecialchars($_POST['synopsis']);
         $adsURL = htmlspecialchars($_POST['ads_url']);
+        $newURLAds = "";
 
         $isEdit = false;
 
@@ -62,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 exit;
             }
         } else {
-            $secure_id = htmlspecialchars($_POST['secure_id']);
+            $secure_id = Uuid::uuid1()->toString();
             $sql = "SELECT * FROM mangas m WHERE title='".$manga_title."' LIMIT 1";
             $stmt = $db->query($sql);
             $manga = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -251,10 +252,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
                 try {
-                    $sql2 = "INSERT INTO mangas (title, secure_id, author_id, genres_id, status, synopsis, cover_img, headline_img) VALUES (:title, :secure_id, :author_id, :genres_id, :status, :synopsis, :cover_img, :headline_img)";
+                    $sql2 = "INSERT INTO mangas (title, secure_id, author_id, genres_id, status, synopsis, cover_img, headline_img, ads_img, ads_url) VALUES (:title, :secure_id, :author_id, :genres_id, :status, :synopsis, :cover_img, :headline_img, :ads_img, :ads_url)";
                     $stmt2 = $db->prepare($sql2);
                     
-                    $secure_id = Uuid::uuid1()->toString();
                     $stmt2->bindParam(':title', $manga_title, PDO::PARAM_STR);
                     $stmt2->bindParam(':secure_id', $secure_id, PDO::PARAM_STR);
                     $stmt2->bindParam(':author_id', $author, PDO::PARAM_STR);
@@ -263,6 +263,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt2->bindParam(':synopsis', $synopsis, PDO::PARAM_STR);
                     $stmt2->bindParam(':cover_img', $newURL, PDO::PARAM_STR);
                     $stmt2->bindParam(':headline_img', $newURLHeadline, PDO::PARAM_STR);
+                    $stmt2->bindParam(':ads_img', $newURLAds, PDO::PARAM_STR);
+                    $stmt2->bindParam(':ads_url', $adsURL, PDO::PARAM_STR);
                     // Execute the statement
                     $stmt2->execute();
                     unset($_SESSION['error']);
