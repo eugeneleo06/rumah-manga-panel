@@ -32,6 +32,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $editPath = '?q='.$secure_id;
 
 
+        echo $editPath;exit;
+
+
         $chapters = $_POST['chapters'];
 
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
