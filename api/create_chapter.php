@@ -111,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $db->commit();
         unset($_SESSION['error']);
         echo 'success';
-        echo $secure_id;
+        var_dump($_POST);
         exit;
         header('Location: ../upsert_chapter.php?q='.$secure_id);
     } catch (PDOException $e) { 
