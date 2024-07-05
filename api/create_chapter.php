@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         $db->beginTransaction();
-        foreach($chapters as $index=>&$chapter) {
+        foreach($chapters as $index=>$chapter) {
             $title = $chapter['title'];
             $images = $_FILES['chapters']['name'][$index]['file'];
             $newURL = [];
@@ -90,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ]);
     
                     $newURL[] = 'https://pub-2bfa6b528bf54fa9a840c5feca5a3a76.r2.dev/'.$manga_id.'/'.$newFileName;
+                    echo $index;
                 } catch (AwsException $e) {
                     $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
                     $db->rollBack();
@@ -111,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "UPDATE mangas SET modified_date='".date('Y-m-d H:i:s')."' WHERE id = ".$manga_id;
             $stmt = $db->prepare($sql);
             $stmt->execute();
-
+            exit;
         }
         $db->commit();
         unset($_SESSION['error']);
