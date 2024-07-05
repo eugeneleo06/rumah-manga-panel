@@ -67,8 +67,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!in_array(strtolower($fileExtension), $allowed)) {
                     $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
                     $db->rollBack();
-                    echo 'valid file';
-                    exit;
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
 
@@ -76,8 +74,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($fileSize > $maxSize) {
                     $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
                     $db->rollBack();
-                    echo 'exceed';
-                    exit;
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
 
@@ -93,9 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $newURL[] = 'https://pub-2bfa6b528bf54fa9a840c5feca5a3a76.r2.dev/'.$manga_id.'/'.$newFileName;
                 } catch (AwsException $e) {
                     $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
-                    $db->rollBack();
-                    echo 'rollback';
-                    exit;    
+                    $db->rollBack(); 
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
             }
@@ -113,12 +107,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "UPDATE mangas SET modified_date='".date('Y-m-d H:i:s')."' WHERE id = ".$manga_id;
             $stmt = $db->prepare($sql);
             $stmt->execute();
-            echo 'done';
-            exit;
         }
         $db->commit();
         unset($_SESSION['error']);
         echo 'success';
+        echo $secure_id;
         exit;
         header('Location: ../upsert_chapter.php?q='.$secure_id);
     } catch (PDOException $e) { 
