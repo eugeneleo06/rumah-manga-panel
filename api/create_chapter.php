@@ -91,8 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
                     $db->rollBack();
                     echo 'rollback';
-                    header('Location: ../upsert_chapter.php'.$editPath);
                     exit;    
+                    header('Location: ../upsert_chapter.php'.$editPath);
                 }
             }
             $imgURL = json_encode($newURL);
@@ -115,8 +115,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $db->commit();
         unset($_SESSION['error']);
         echo 'success';
-        header('Location: ../upsert_chapter.php?q='.$secure_id);
         exit;
+        header('Location: ../upsert_chapter.php?q='.$secure_id);
     } catch (PDOException $e) { 
         echo $e->getMessage();
         exit;
