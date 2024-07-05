@@ -67,6 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!in_array(strtolower($fileExtension), $allowed)) {
                     $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
                     $db->rollBack();
+                    echo 'valid file';
+                    exit;
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
 
@@ -74,6 +76,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($fileSize > $maxSize) {
                     $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
                     $db->rollBack();
+                    echo 'exceed';
+                    exit;
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
 
