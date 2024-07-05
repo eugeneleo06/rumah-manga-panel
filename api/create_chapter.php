@@ -107,6 +107,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':img_url', $imgURL , PDO::PARAM_STR);
             $stmt->bindParam(':manga_id', $manga_id , PDO::PARAM_INT);
             $stmt->execute();
+
+            $sql = "UPDATE mangas SET modified_date='".date('Y-m-d H:i:s')."' WHERE id = ".$manga_id;
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+
         }
         $db->commit();
         unset($_SESSION['error']);
