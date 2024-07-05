@@ -32,9 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $editPath = '?q='.$secure_id;
 
 
-        echo $editPath;exit;
-
-
         $chapters = $_POST['chapters'];
 
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -50,8 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'endpoint' => 'https://110919c691af57fd4283c3c05211252d.r2.cloudflarestorage.com/',
             'credentials' => [
                 'key' => '020c964526eb3f64d899f9d5b6905d7a',
-                'secret' => '0fd485ace28b70d417ac19f249f2cb2b0836c6051f854c02ed9e464de3e2b279
-',
+                'secret' => '0fd485ace28b70d417ac19f249f2cb2b0836c6051f854c02ed9e464de3e2b279',
             ],
         ]);
 
@@ -72,7 +68,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['error'] = "Please upload a valid file type (jpg, jpeg, png, webp)";
                     $db->rollBack();
                     header('Location: ../upsert_chapter.php'.$editPath);
-                    exit;
                 }
 
                 // Validate file size
@@ -80,7 +75,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
                     $db->rollBack();
                     header('Location: ../upsert_chapter.php'.$editPath);
-                    exit;
                 }
 
                 try {
@@ -93,10 +87,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ]);
     
                     $newURL[] = 'https://pub-2bfa6b528bf54fa9a840c5feca5a3a76.r2.dev/'.$manga_id.'/'.$newFileName;
-                    echo $index;
                 } catch (AwsException $e) {
                     $_SESSION['error'] = "Error uploading file : " . $e->getMessage();
                     $db->rollBack();
+                    echo 'rollback';
                     header('Location: ../upsert_chapter.php'.$editPath);
                     exit;    
                 }
@@ -115,10 +109,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "UPDATE mangas SET modified_date='".date('Y-m-d H:i:s')."' WHERE id = ".$manga_id;
             $stmt = $db->prepare($sql);
             $stmt->execute();
+            echo 'done';
             exit;
         }
         $db->commit();
         unset($_SESSION['error']);
+        echo 'success';
         header('Location: ../upsert_chapter.php?q='.$secure_id);
         exit;
     } catch (PDOException $e) { 
