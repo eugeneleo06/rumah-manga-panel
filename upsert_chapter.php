@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                         <br>
                         <div class="form-row px-5">
                             <?php
-                            foreach($chapters as $chapter) {
+                            foreach($chapters as $i=>$chapter) {
                                 echo '<form class="form-upsert" action="api/update_chapter.php?q='.$chapter['secure_id'].'" method="post" enctype="multipart/form-data">';
                                 echo '<div id="chapter_' . $chapter['secure_id'] . '" class="chapter-content" style="display: none;">';
                                 echo '<label>Chapter Name</label>';
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
                                 echo '<input class="form-control form-control-md" type="file" name="chapter_image[]" multiple accept="image/*"/>';
                                 echo '<input type="hidden" name="secure_id" value="'.$chapter['secure_id'].'">';
                                 echo '<input type="submit" class="btn btn-success my-3" value="Save Chapter"> ';
-                                echo '<button type="button" class="btn btn-danger my-3" id="delete-btn" data-secure-id="'.$chapter['secure_id'].'">Delete Chapter</button>';
+                                echo '<button type="button" class="btn btn-danger my-3" id="delete-btn-'.$i.'" data-secure-id="'.$chapter['secure_id'].'">Delete Chapter</button>';
                                 echo '</div>';
                                 if (isset($_SESSION['error'])) : ?>
                                     <p style="color: red;"><?php echo $_SESSION['error']; ?></p>
@@ -209,7 +209,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") :
             });
         });
         
-        $('#delete-btn').click(function(event) {
+        $('[id^=delete-btn-]').click(function(event) {
             event.preventDefault();
             var secureId = $(this).data('secure-id');
             var deleteUrl = 'api/delete_chapter.php?q=' + secureId;
