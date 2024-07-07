@@ -72,8 +72,6 @@ use Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise registerWebhookWithThirdPartyAsync(array $args = [])
  * @method \Aws\Result retryStageExecution(array $args = [])
  * @method \GuzzleHttp\Promise\Promise retryStageExecutionAsync(array $args = [])
- * @method \Aws\Result rollbackStage(array $args = [])
- * @method \GuzzleHttp\Promise\Promise rollbackStageAsync(array $args = [])
  * @method \Aws\Result startPipelineExecution(array $args = [])
  * @method \GuzzleHttp\Promise\Promise startPipelineExecutionAsync(array $args = [])
  * @method \Aws\Result stopPipelineExecution(array $args = [])
