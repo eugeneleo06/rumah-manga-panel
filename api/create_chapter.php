@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $chapters = $_POST['chapters'];
 
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        $maxSize = 3 * 1024 * 1024; // 3MB
+        $maxSize = 10 * 1024 * 1024; // 3MB
 
         // Cloudflare R2 configuration
         $bucketName = 'rumah-manga';
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Validate file size
                 if ($fileSize > $maxSize) {
-                    $_SESSION['error'] = "File size exceeds the maximum limit of 3MB";
+                    $_SESSION['error'] = "File size exceeds the maximum limit of 10MB";
                     $db->rollBack();
                     header('Location: ../upsert_chapter.php'.$editPath);
                 }
